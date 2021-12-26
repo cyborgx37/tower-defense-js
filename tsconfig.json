@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"alwaysStrict": true,
+		"module": "CommonJS",
+		"noImplicitAny": true,
+		"outDir": "build/ts",
+		"rootDir": "src",
+		"sourceMap": true,
+		"strict": true,
+	}
+}
