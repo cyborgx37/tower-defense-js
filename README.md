@@ -1,0 +1,1 @@
+A basic tower defense game written in TypeScript using the VanillaJS game framework.

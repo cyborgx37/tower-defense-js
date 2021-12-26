@@ -1,10 +1,13 @@
 {
 	"compilerOptions": {
+		"allowSyntheticDefaultImports": true,
 		"alwaysStrict": true,
-		"module": "CommonJS",
+		"esModuleInterop": true,
+		"module": "AMD",
+		"moduleResolution": "node",
 		"noImplicitAny": true,
 		"outDir": "build/ts",
-		"rootDir": "src",
+		"rootDir": "src/js",
 		"sourceMap": true,
 		"strict": true,
 	}

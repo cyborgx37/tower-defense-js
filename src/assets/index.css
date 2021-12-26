@@ -1,0 +1,7 @@
+BODY {
+	padding: 0;
+	margin: 0;
+	display: grid;
+	grid-template-columns: 100vw;
+	grid-template-rows: 100vh;
+}
