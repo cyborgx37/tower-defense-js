@@ -4,7 +4,7 @@ import Spritesheet, { Tuple2Nums, Tuple4Nums } from "../spritesheet";
 
 export interface CharacterComponent extends Component {
 	direction: "n"|"e"|"s"|"w";
-	done: boolean;
+	done: ()=>void;
 	path: Tuple2Nums[];
 	speed: number;
 	x: number;
@@ -36,9 +36,10 @@ export default class CharacterSpritesheet extends Spritesheet {
 		let currentTime:number = -1;
 		let currentFrom = path.shift();
 		let currentTo = path.shift();
+		let isDone = false;
 		return {
 			direction: "s",
-			done: false,
+			done: () => void 0,
 			path,
 			speed: 1, // standard tiles per second
 			x: currentFrom?.[0] ?? 0,
@@ -47,7 +48,7 @@ export default class CharacterSpritesheet extends Spritesheet {
 			lifeMax: 32,
 			lifePct: 1,
 			compute(elapsedTime, totalTime) {
-				if (this.done) return;
+				if (isDone) return;
 				currentTime = totalTime;
 				this.lifePct = this.life / this.lifeMax;
 				if (currentTo) {
@@ -66,11 +67,12 @@ export default class CharacterSpritesheet extends Spritesheet {
 						this.y += (rise * ratio);
 					}
 				} else {
-					this.done = true;
+					isDone = true;
+					this.done();
 				}
 			},
 			render() {
-				if (this.done) return;
+				if (isDone) return;
 				character.animate(`running${this.direction}`, currentTime, [ this.x, this.y - 1]);
 				character.camera.fillRect([this.x + 0.1, this.y - 0.8, 0.8 * this.lifePct, 0.2], "#FF0000AA");
 				character.camera.strokeRect([this.x + 0.1, this.y - 0.8, 0.8, 0.2], "black");

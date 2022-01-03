@@ -1,6 +1,6 @@
 import "../assets/index.css";
 import Camera from "./Camera";
-import CharacterSpritesheet from "./sprites/CharacterSpritesheet";
+import CharacterSpritesheet, { CharacterComponent } from "./sprites/CharacterSpritesheet";
 import TilesSpritesheet from "./sprites/TilesSpritesheet";
 
 async function start() {
@@ -47,7 +47,22 @@ async function start() {
 
 	const character = new CharacterSpritesheet(camera);
 	character.load().then(() => {
-		camera.registerComponent(character.createRunningGuy([[-2, 2], [10, 2], [10, 10], [33, 10]]));
+		// Create a bad-guy spawner
+		let lastSpawn = 0;
+		let guys:CharacterComponent[] = [];
+		camera.registerComponent({
+			compute(_, totalTime) {
+				if (totalTime - lastSpawn > 2000) {
+					lastSpawn = totalTime;
+					const guy = character.createRunningGuy([[-2, 2], [10, 2], [10, 10], [33, 10]]);
+					guy.speed = 0.75 + (Math.random() * 0.75);
+					guy.done = () => void guys.splice(guys.indexOf(guy), 1);
+					guys.push(guy);
+					camera.registerComponent(guy);
+				}
+			},
+			render() {},
+		});
 	});
 }
 
