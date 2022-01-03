@@ -145,6 +145,13 @@ export default class Camera {
 		foreground.fillRect(translatedX, translatedY, dWidth * tileSize, dHeight * tileSize);
 	}
 
+	strokeRect([dx, dy, dWidth, dHeight]:Tuple4Nums, strokeStyle:typeof CanvasRenderingContext2D.prototype.strokeStyle) {
+		const { foreground, tileSize } = this[p];
+		const [translatedX, translatedY] = this.worldToScreen([dx, dy]);
+		foreground.strokeStyle = strokeStyle;
+		foreground.strokeRect(translatedX, translatedY, dWidth * tileSize, dHeight * tileSize);
+	}
+
 	compute() {
 		const elapsedTime = this.getElapasedTime();
 		for (const c of this[p].components) c.compute(elapsedTime, this.time);

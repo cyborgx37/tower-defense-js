@@ -9,6 +9,9 @@ export interface CharacterComponent extends Component {
 	speed: number;
 	x: number;
 	y: number;
+	life: number;
+	lifeMax: number;
+	lifePct: number;
 }
 
 export default class CharacterSpritesheet extends Spritesheet {
@@ -40,10 +43,13 @@ export default class CharacterSpritesheet extends Spritesheet {
 			speed: 1, // standard tiles per second
 			x: currentFrom?.[0] ?? 0,
 			y: currentFrom?.[1] ?? 0,
+			life: 32,
+			lifeMax: 32,
+			lifePct: 1,
 			compute(elapsedTime, totalTime) {
 				if (this.done) return;
 				currentTime = totalTime;
-				// distance moved since the last compute
+				this.lifePct = this.life / this.lifeMax;
 				if (currentTo) {
 					const run = currentTo[0] - this.x;
 					const rise = currentTo[1] - this.y;
@@ -66,8 +72,8 @@ export default class CharacterSpritesheet extends Spritesheet {
 			render() {
 				if (this.done) return;
 				character.animate(`running${this.direction}`, currentTime, [ this.x, this.y - 1]);
-				// character.camera.fillRect([this.x + 0.1,  this.y + 0.6,  0.8,  0.1], "black");
-				character.camera.fillRect([this.x + 0.12, this.y + 0.62, 0.76, 0.06], "#FF0000AA");
+				character.camera.fillRect([this.x + 0.1, this.y - 0.8, 0.8 * this.lifePct, 0.2], "#FF0000AA");
+				character.camera.strokeRect([this.x + 0.1, this.y - 0.8, 0.8, 0.2], "black");
 			},
 		};
 	}
