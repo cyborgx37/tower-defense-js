@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "file-loader": "^6.2.0"
   },
   "devDependencies": {
     "css-loader": "^6.5.1",

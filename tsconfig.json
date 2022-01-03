@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		"allowSyntheticDefaultImports": true,
 		"alwaysStrict": true,
+		"downlevelIteration": true,
 		"esModuleInterop": true,
 		"module": "AMD",
 		"moduleResolution": "node",
@@ -10,5 +11,6 @@
 		"rootDir": "src/js",
 		"sourceMap": true,
 		"strict": true,
+		"target": "ES6",
 	}
 }
