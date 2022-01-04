@@ -1,6 +1,6 @@
 import "../assets/index.css";
 import Camera from "./Camera";
-import CharacterSpritesheet, { CharacterComponent } from "./sprites/CharacterSpritesheet";
+import CharacterSpritesheet, { WalkerComponent } from "./sprites/CharacterSpritesheet";
 import TilesSpritesheet from "./sprites/TilesSpritesheet";
 
 async function start() {
@@ -30,6 +30,7 @@ async function start() {
 	});
 
 	camera.registerComponent({
+		type: "worker",
 		compute: () => {
 			const { body } = document;
 			canvas.height = body.clientHeight;
@@ -39,31 +40,49 @@ async function start() {
 	});
 
 	const tile = new TilesSpritesheet(camera);
-	tile.load().then(() => {
-		camera.registerComponent(tile.createRipples());
-		camera.registerComponent(tile.createGrassPatch([0, 0, 32, 18]));
-		camera.registerComponent(tile.createDirthPath([[0, 2], [10, 2], [10, 10], [31, 10]]));
-	});
-
 	const character = new CharacterSpritesheet(camera);
-	character.load().then(() => {
-		// Create a bad-guy spawner
-		let lastSpawn = 0;
-		let guys:CharacterComponent[] = [];
-		camera.registerComponent({
-			compute(_, totalTime) {
-				if (totalTime - lastSpawn > 2000) {
-					lastSpawn = totalTime;
-					const guy = character.createRunningGuy([[-2, 2], [10, 2], [10, 10], [33, 10]]);
-					guy.speed = 0.75 + (Math.random() * 0.75);
-					guy.done = () => void guys.splice(guys.indexOf(guy), 1);
-					guys.push(guy);
-					camera.registerComponent(guy);
+	await Promise.all([ tile.load(), character.load() ]);
+
+	const path = tile.createDirthPath([[-2, 2], [10, 2], [10, 10], [33, 10]]);
+
+	camera.registerComponent(tile.createRipples());
+	camera.registerComponent(tile.createGrassPatch([0, 0, 32, 18]));
+	camera.registerComponent(path);
+	camera.registerComponent(path.registerTower(tile.createCannon([12,8], "w")));
+	camera.registerComponent(path.registerTower(tile.createCannon([13,8], "s")));
+	camera.registerComponent(path.registerTower(tile.createCannon([14,13], "n")));
+
+	// Create a bad-guy spawner
+	const spawner = {
+		type: "worker" as const,
+		lastSpawn: 0,
+		guys: [] as WalkerComponent[],
+		compute(_:number, totalTime:number) {
+			const { guys } = this;
+			if (totalTime - this.lastSpawn > 2000) {
+				this.lastSpawn = totalTime;
+				const guy = character.createRunningGuy();
+				path.registerPathWalker(guy);
+				guy.speed = 0.75 + (Math.random() * 0.75);
+				guy.done = () => {
+					guys.splice(guys.indexOf(guy), 1);
+					path.unregisterPathWalker(guy);
+					camera.unregisterComponent(guy);
+					if (guy.life <= 0) {
+						const bones = tile.createBones([guy.x, guy.y]);
+						bones.done = () => {
+							camera.unregisterComponent(bones);
+						};
+						camera.registerComponent(bones);
+					}
 				}
-			},
-			render() {},
-		});
-	});
+				guys.push(guy);
+				camera.registerComponent(guy);
+			}
+		},
+		render() {},
+	};
+	camera.registerComponent(spawner);
 }
 
 start();

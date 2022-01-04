@@ -1,4 +1,5 @@
 import Component from "./Component";
+import { isWalker } from "./sprites/CharacterSpritesheet";
 import { Tuple4Nums } from "./spritesheet";
 
 const p = Symbol();
@@ -79,6 +80,12 @@ export default class Camera {
 		window.setInterval(this.compute, 0, canvas);
 	}
 
+	compute() {
+		const { ctx } = this[p];
+		const elapsedTime = this.getElapasedTime();
+		for (const c of this[p].components) c.compute(elapsedTime, this.time);
+	}
+
 	render() {
 		const { background, canvas, ctx, foreground } = this[p];
 		const { width: cWidth, height: cHeight } = canvas;
@@ -152,13 +159,17 @@ export default class Camera {
 		foreground.strokeRect(translatedX, translatedY, dWidth * tileSize, dHeight * tileSize);
 	}
 
-	compute() {
-		const elapsedTime = this.getElapasedTime();
-		for (const c of this[p].components) c.compute(elapsedTime, this.time);
-	}
-
 	registerComponent(component:Component) {
 		this[p].components.push(component);
+		return component;
+	}
+
+	unregisterComponent(component:Component) {
+		const { components } = this[p];
+		const index = components.indexOf( component );
+		if (index < 0) return;
+		components.splice(index, 1);
+		return component;
 	}
 
 	worldToScreen([x, y]:[number, number]):[number, number] {
