@@ -1,6 +1,7 @@
 import characterUrl from "../../assets/character.png";
 import Component, { CompassDirection } from "../Component";
 import Spritesheet, { Tuple2Nums, Tuple4Nums } from "../spritesheet";
+import { TowerComponent } from "./TilesSpritesheet";
 
 export interface WalkerComponent extends Component {
 	direction:CompassDirection;
@@ -23,22 +24,38 @@ export function isWalker(c:Component):c is WalkerComponent {
 export default class CharacterSpritesheet extends Spritesheet {
 	async load():Promise<void> {
 		return await super.load(characterUrl, {
-			"runnings1": [9*16,  0*32, 16, 32],
-			"runnings2": [10*16, 0*32, 16, 32],
-			"runnings3": [11*16, 0*32, 16, 32],
-			"runnings4": [12*16, 0*32, 16, 32],
-			"runninge1": [9*16,  1*32, 16, 32],
-			"runninge2": [10*16, 1*32, 16, 32],
-			"runninge3": [11*16, 1*32, 16, 32],
-			"runninge4": [12*16, 1*32, 16, 32],
-			"runningn1": [9*16,  2*32, 16, 32],
-			"runningn2": [10*16, 2*32, 16, 32],
-			"runningn3": [11*16, 2*32, 16, 32],
-			"runningn4": [12*16, 2*32, 16, 32],
-			"runningw1": [9*16,  3*32, 16, 32],
-			"runningw2": [10*16, 3*32, 16, 32],
-			"runningw3": [11*16, 3*32, 16, 32],
-			"runningw4": [12*16, 3*32, 16, 32],
+			"runnings1": [0*16,  0*32, 16, 32],
+			"runnings2": [1*16, 0*32, 16, 32],
+			"runnings3": [2*16, 0*32, 16, 32],
+			"runnings4": [3*16, 0*32, 16, 32],
+			"runninge1": [0*16,  1*32, 16, 32],
+			"runninge2": [1*16, 1*32, 16, 32],
+			"runninge3": [2*16, 1*32, 16, 32],
+			"runninge4": [3*16, 1*32, 16, 32],
+			"runningn1": [0*16,  2*32, 16, 32],
+			"runningn2": [1*16, 2*32, 16, 32],
+			"runningn3": [2*16, 2*32, 16, 32],
+			"runningn4": [3*16, 2*32, 16, 32],
+			"runningw1": [0*16,  3*32, 16, 32],
+			"runningw2": [1*16, 3*32, 16, 32],
+			"runningw3": [2*16, 3*32, 16, 32],
+			"runningw4": [3*16, 3*32, 16, 32],
+			"swordings1": [0*32, 4*32, 32, 32],
+			"swordings2": [1*32, 4*32, 32, 32],
+			"swordings3": [2*32, 4*32, 32, 32],
+			"swordings4": [3*32, 4*32, 32, 32],
+			"swordingn1": [0*32, 5*32, 32, 32],
+			"swordingn2": [1*32, 5*32, 32, 32],
+			"swordingn3": [2*32, 5*32, 32, 32],
+			"swordingn4": [3*32, 5*32, 32, 32],
+			"swordinge1": [0*32, 6*32, 32, 32],
+			"swordinge2": [1*32, 6*32, 32, 32],
+			"swordinge3": [2*32, 6*32, 32, 32],
+			"swordinge4": [3*32, 6*32, 32, 32],
+			"swordingw1": [0*32, 7*32, 32, 32],
+			"swordingw2": [1*32, 7*32, 32, 32],
+			"swordingw3": [2*32, 7*32, 32, 32],
+			"swordingw4": [3*32, 7*32, 32, 32],
 			"crumples1": [5*16, 0*32, 16, 32],
 			"crumples2": [6*16, 0*32, 16, 32],
 			"crumples3": [7*16, 0*32, 16, 32],
@@ -97,6 +114,30 @@ export default class CharacterSpritesheet extends Spritesheet {
 			"crumplew": [
 				["crumplew2", 200],
 				["crumplew1", 200],
+			],
+			"swordings": [
+				["swordings1", 150],
+				["swordings2", 50],
+				["swordings3", 50],
+				["swordings4", 50],
+			],
+			"swordingn": [
+				["swordingn1", 150],
+				["swordingn2", 50],
+				["swordingn3", 50],
+				["swordingn4", 50],
+			],
+			"swordinge": [
+				["swordinge1", 150],
+				["swordinge2", 50],
+				["swordinge3", 50],
+				["swordinge4", 50],
+			],
+			"swordingw": [
+				["swordingw1", 150],
+				["swordingw2", 50],
+				["swordingw3", 50],
+				["swordingw4", 50],
 			],
 		});
 	}
@@ -209,6 +250,48 @@ export default class CharacterSpritesheet extends Spritesheet {
 					this.life = 0;
 					deathIndicator = 400;
 				}
+			},
+		};
+	}
+
+	createSworder(coords:Tuple2Nums, direction:CompassDirection):TowerComponent {
+		const character = this;
+		let currentTime:number = -1;
+		let walkersInRange:WalkerComponent[]|undefined;
+		let lastShot:number = 0;
+		let attacking = 0;
+		const timeBetweenShots = 300;
+		return {
+			type:"tower",
+			direction,
+			x: coords[0],
+			y: coords[1],
+			range: 2,
+			compute(elapsedTime, totalTime) {
+				currentTime = totalTime;
+				if (attacking > 0) attacking -= elapsedTime;
+				if (attacking < 0) attacking = 0;
+				if (!walkersInRange?.length) return;
+				if (totalTime - lastShot >= timeBetweenShots) {
+					lastShot = totalTime;
+					walkersInRange[0].shoot(5);
+					attacking = 300;
+				}
+				// Walkers won't necessarily remain in range, so we need to clear this cache once we've processed it
+				walkersInRange = undefined;
+			},
+			render() {
+				if (attacking > 0) {
+					character.animate(`swording${this.direction}`, attacking, [
+						this.x,
+						this.y - 1,
+					]);
+				} else {
+					character.draw(`swording${this.direction}1`, [this.x, this.y - 1])
+				}
+			},
+			target(walkers:WalkerComponent[]):void {
+				walkersInRange = walkers.filter(w => w.life > 0);
 			},
 		};
 	}

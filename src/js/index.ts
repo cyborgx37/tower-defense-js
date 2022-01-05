@@ -51,16 +51,24 @@ async function start() {
 	camera.registerComponent(path.registerTower(tile.createCannon([12,8], "w")));
 	camera.registerComponent(path.registerTower(tile.createCannon([13,8], "s")));
 	camera.registerComponent(path.registerTower(tile.createCannon([14,13], "n")));
+	camera.registerComponent(path.registerTower(tile.createCannon([14,13], "n")));
+	camera.registerComponent(path.registerTower(tile.createCannon([17,13], "n")));
+	camera.registerComponent(path.registerTower(character.createSworder([18,9], "s")));
+	camera.registerComponent(path.registerTower(character.createSworder([19,9], "s")));
+	camera.registerComponent(path.registerTower(character.createSworder([20,9], "s")));
+	camera.registerComponent(path.registerTower(character.createSworder([21,9], "s")));
 
 	// Create a bad-guy spawner
 	const spawner = {
 		type: "worker" as const,
 		lastSpawn: 0,
+		nextSpawn: 2000,
 		guys: [] as WalkerComponent[],
 		compute(_:number, totalTime:number) {
 			const { guys } = this;
-			if (totalTime - this.lastSpawn > 2000) {
+			if (totalTime - this.lastSpawn > this.nextSpawn) {
 				this.lastSpawn = totalTime;
+				this.nextSpawn = (Math.random() * 1000);
 				const guy = character.createRunningGuy();
 				path.registerPathWalker(guy);
 				guy.speed = 0.75 + (Math.random() * 0.75);
