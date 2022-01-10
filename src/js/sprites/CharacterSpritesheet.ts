@@ -281,13 +281,13 @@ export default class CharacterSpritesheet extends Spritesheet {
 				walkersInRange = undefined;
 			},
 			render() {
+				let { x, y } = this;
+				y -= 0.75;
+				if (this.direction === "n" || this.direction === "s") x -= 0.5;
 				if (attacking > 0) {
-					character.animate(`swording${this.direction}`, attacking, [
-						this.x,
-						this.y - 1,
-					]);
+					character.animate(`swording${this.direction}`, attacking, [x, y]);
 				} else {
-					character.draw(`swording${this.direction}1`, [this.x, this.y - 1])
+					character.draw(`swording${this.direction}1`, [x, y])
 				}
 			},
 			target(walkers:WalkerComponent[]):void {

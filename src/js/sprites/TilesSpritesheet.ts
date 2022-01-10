@@ -16,20 +16,30 @@ export interface GrassPatchComponent extends Component {
 	width: number;
 	height: number;
 }
-export interface DirtPathComponent extends Component {
+export interface PathComponent extends Component {
+	type: "path",
 	registerPathWalker(pathWalker:WalkerComponent):WalkerComponent;
 	unregisterPathWalker(pathWalker:WalkerComponent):WalkerComponent;
 	findTile(fromPoint:Tuple2Nums, toPoint:Tuple2Nums):Tuple2Nums|undefined;
 	subscribeToTile(tileCoords:Tuple2Nums, callback:(walkers:WalkerComponent[])=>void):void;
 	registerTower(tower:TowerComponent):TowerComponent;
+	findComponent(position:Tuple2Nums):TowerComponent|WalkerComponent|undefined;
 }
 export interface TowerComponent extends Component {
+	type: "tower",
 	x: number;
 	y: number;
 	direction: CompassDirection;
 	range: number;
 	distanceToTarget?: number;
 	target(walkers:WalkerComponent[]):void;
+}
+
+export function isPath(c?:Component):c is PathComponent {
+	return c?.type === "path";
+}
+export function isTower(c?:Component):c is TowerComponent {
+	return c?.type === "tower";
 }
 
 function* tracePath(path:Tuple2Nums[]) {
@@ -128,12 +138,13 @@ export default class TilesSpritesheet extends Spritesheet {
 		};
 	}
 
-	createDirthPath(path:Tuple2Nums[]):DirtPathComponent {
+	createDirthPath(path:Tuple2Nums[]):PathComponent {
 		const tiles = this;
 		const positions:Tuple2Nums[] = [];
 		for (const pos of tracePath(path)) {
 			positions.push(pos);
 		}
+		const towers:TowerComponent[] = [];
 		const pathWalkers:WalkerComponent[] = [];
 		const subscriptions:Record<string,((walkers:WalkerComponent[])=>void)[]> = {};
 		return {
@@ -200,8 +211,18 @@ export default class TilesSpritesheet extends Spritesheet {
 						(b === 0) ? Math.abs(a):
 						Math.sqrt((a*a)+(b*b));
 				}
+				towers.push(tower);
 				return tower;
-			}
+			},
+			findComponent(position:Tuple2Nums):TowerComponent|WalkerComponent|undefined {
+				const [x, y] = position;
+				for (const t of towers) {
+					if (t.x === x && t.y === y) return t;
+				}
+				for (const w of pathWalkers) {
+					if (w.x === x && w.y === y) return w;
+				}
+			},
 		}
 	}
 

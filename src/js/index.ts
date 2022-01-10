@@ -1,7 +1,7 @@
 import "../assets/index.css";
 import Camera from "./Camera";
 import CharacterSpritesheet, { WalkerComponent } from "./sprites/CharacterSpritesheet";
-import TilesSpritesheet from "./sprites/TilesSpritesheet";
+import TilesSpritesheet, { isPath } from "./sprites/TilesSpritesheet";
 
 async function start() {
 	const canvas = document.createElement("canvas");
@@ -13,20 +13,26 @@ async function start() {
 	camera.start();
 
 	canvas.addEventListener("pointerdown", (e) => {
-		canvas.setPointerCapture(e.pointerId);
-		let originX = e.clientX;
-		let originY = e.clientY;
-		const pointerMoveHandler = (e:PointerEvent) => {
-			camera.panScreen([originX - e.clientX, originY - e.clientY]);
-			originX = e.clientX;
-			originY = e.clientY;
-		};
-		canvas.addEventListener("pointermove", pointerMoveHandler);
-		const pointerUpHandler = () => {
-			canvas.removeEventListener("pointermove", pointerMoveHandler);
-			canvas.removeEventListener("pointerup", pointerUpHandler);
-		};
-		canvas.addEventListener("pointerup", pointerUpHandler);
+		const { clientX,  clientY } = e;
+
+		const target = camera.click([clientX, clientY]);
+
+		if (isPath(target)) {
+			canvas.setPointerCapture(e.pointerId);
+			let originX = clientX;
+			let originY = clientY;
+			const pointerMoveHandler = (e:PointerEvent) => {
+				camera.panScreen([originX - e.clientX, originY - e.clientY]);
+				originX = e.clientX;
+				originY = e.clientY;
+			};
+			canvas.addEventListener("pointermove", pointerMoveHandler);
+			const pointerUpHandler = () => {
+				canvas.removeEventListener("pointermove", pointerMoveHandler);
+				canvas.removeEventListener("pointerup", pointerUpHandler);
+			};
+			canvas.addEventListener("pointerup", pointerUpHandler);
+		}
 	});
 
 	camera.registerComponent({
@@ -43,7 +49,7 @@ async function start() {
 	const character = new CharacterSpritesheet(camera);
 	await Promise.all([ tile.load(), character.load() ]);
 
-	const path = tile.createDirthPath([[-2, 2], [10, 2], [10, 10], [33, 10]]);
+	const path = tile.createDirthPath([[-2, 2], [10, 2], [10, 10], [23, 10], [23, 15], [16, 15], [16, 16], [30, 16], [30, 10], [33, 10]]);
 
 	camera.registerComponent(tile.createRipples());
 	camera.registerComponent(tile.createGrassPatch([0, 0, 32, 18]));
